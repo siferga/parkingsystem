@@ -20,7 +20,7 @@ public class TicketDAO {
     public DataBaseConfig dataBaseConfig = new DataBaseConfig();
 
     public boolean saveTicket(Ticket ticket){
-        Connection con = null;
+        Connection con = null;/*by making Connection con = null it sense we are free up the connection resource, by this there is no leakage in the memory management, but we can't reuse it.*/
         try {
             con = dataBaseConfig.getConnection();
             PreparedStatement ps = con.prepareStatement(DBConstants.SAVE_TICKET);
