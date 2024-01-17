@@ -1,10 +1,10 @@
 package com.parkit.parkingsystem.dao;
-
+import com.parkit.parkingsystem.model.Ticket;
 import com.parkit.parkingsystem.config.DataBaseConfig;
 import com.parkit.parkingsystem.constants.DBConstants;
+
 import com.parkit.parkingsystem.constants.ParkingType;
 import com.parkit.parkingsystem.model.ParkingSpot;
-import com.parkit.parkingsystem.model.Ticket;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -21,6 +21,7 @@ public class TicketDAO {
 
     public boolean saveTicket(Ticket ticket){
         Connection con = null;/*by making Connection con = null it sense we are free up the connection resource, by this there is no leakage in the memory management, but we can't reuse it.*/
+
         try {
             con = dataBaseConfig.getConnection();
             PreparedStatement ps = con.prepareStatement(DBConstants.SAVE_TICKET);
@@ -86,4 +87,60 @@ public class TicketDAO {
         }
         return false;
     }
+
+
+    /*public boolean regularCustomer(String vehicleRegNumber) {
+        Connection con = null;
+        boolean ifRegularCustomer;
+        try {
+            con = dataBaseConfig.getConnection();
+            PreparedStatement ps = con.prepareStatement(String.valueOf(DBConstants.REGULAR_CUSTOMER)); //Constant REGULAR_CUSTOMER creation
+            ps.setString(1,vehicleRegNumber);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()){
+                ifRegularCustomer = true;
+            }else {
+                ifRegularCustomer = false;
+            }
+                dataBaseConfig.closeResultSet(rs);
+            dataBaseConfig.closePreparedStatement(ps);
+        }catch (Exception ex){
+            logger.error("Error?",ex);
+        }finally {
+            dataBaseConfig.closeConnection(con);
+        }
+        return false;
+    }*/
+    public boolean compareTicket(Ticket ticket) {
+        Connection con = null;
+        String ticketToCompare = "";
+        try {
+            //connexion à la bdd
+            con = dataBaseConfig.getConnection();
+            //prepare statement avec la constante
+            PreparedStatement ps = con.prepareStatement(DBConstants.LOOK_FOR_TICKET);
+            //pour peupler la bdd
+            ps.setString(1, ticket.getVehicleRegNumber());
+            //executer la requete
+            ResultSet rs = ps.executeQuery();
+            // si la plaque existe
+            if (rs.next()) {
+                //je la balance dans la bdd
+                ticketToCompare = (rs.getString(3));
+            }
+
+            dataBaseConfig.closeResultSet(rs);
+            dataBaseConfig.closePreparedStatement(ps);
+
+            if (ticketToCompare.equals(ticket.getVehicleRegNumber())) {
+                return true;
+            }
+        } catch (Exception ex) {
+            logger.error("Error comparing ticket", ex);
+        } finally {
+            dataBaseConfig.closeConnection(con);
+        }
+        return false;
+    }
+
 }
